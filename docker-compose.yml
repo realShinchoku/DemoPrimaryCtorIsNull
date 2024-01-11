@@ -1,0 +1,22 @@
+﻿services:
+  sql-server:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=@P@ssw0rd02
+      - MSSQL_PID=Developer
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+
+  student-svc:
+    depends_on:
+      - rabbitmq
+    image: realshinchoku/student-svc
+    build:
+      context: .
+      dockerfile: StudentService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=80
+      - ConnectionStrings__DefaultConnection=Server=sql-server; Database=InfoStudent; User Id=sa;Password=@P@ssw0rd02;TrustServerCertificate=True;Encrypt=False
+      - RabbitMq__Host=rabbitmq
