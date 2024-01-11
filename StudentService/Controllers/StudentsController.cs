@@ -14,39 +14,35 @@ namespace StudentService.Controllers;
 [Route("api/[controller]")]
 public class StudentsController(DataContext context, IMapper mapper, GraphServiceClient graphClient) : ControllerBase
 {
-    private readonly DataContext _context = context;
-    private readonly GraphServiceClient _graphClient = graphClient;
-    private readonly IMapper _mapper = mapper;
-
     [HttpGet]
     public async Task<ActionResult<List<StudentDto>>> GetAllStudents()
     {
-        var query = _context.Students
+        var query = context.Students
             .OrderBy(x => x.StudentCode).AsQueryable();
 
-        return await query.ProjectTo<StudentDto>(_mapper.ConfigurationProvider).ToListAsync();
+        return await query.ProjectTo<StudentDto>(mapper.ConfigurationProvider).ToListAsync();
     }
 
-    [Authorize]
-    // [HttpPut]
+    // [Authorize]
+    [HttpPut]
     // [AuthorizeForScopes(ScopeKeySection = "DownstreamApi:Scopes")]
     // [AuthorizeForScopes(ScopeKeySection = "AzureAd:Scopes")]
     public async Task<ActionResult<StudentDto>> Edit(StudentUpdateDto studentUpdateDto)
     {
-        var user = await _graphClient.Me.GetAsync(rq => rq.QueryParameters.Select =
+        var user = await graphClient.Me.GetAsync(rq => rq.QueryParameters.Select =
             ["id", "mail", "mobilePhone"]);
 
         var id = Guid.Parse(user.Id);
 
-        var student = await _context.Students.FirstOrDefaultAsync(x => x.Id == id);
+        var student = await context.Students.FirstOrDefaultAsync(x => x.Id == id);
         if (student == null) return NotFound();
 
-        _mapper.Map(studentUpdateDto, student);
+        mapper.Map(studentUpdateDto, student);
 
-        var result = await _context.SaveChangesAsync() > 0;
+        var result = await context.SaveChangesAsync() > 0;
 
         if (!result) return BadRequest();
 
-        return _mapper.Map<StudentDto>(student);
+        return mapper.Map<StudentDto>(student);
     }
 }

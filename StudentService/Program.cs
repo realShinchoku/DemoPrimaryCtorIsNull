@@ -11,7 +11,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Logging.AddLoggingService(builder.Configuration);
 builder.Services.AddApplicationService(builder.Configuration);
 builder.Services.AddControllers();
-builder.Services.AddIdentityService(builder.Configuration);
 
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -52,7 +51,6 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-app.UseApplicationIdentity();
 app.MapControllers();
 
 var retryPolicy = Policy
